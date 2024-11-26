@@ -1,3 +1,7 @@
+from locale import currency
+from tkinter.font import names
+
+from click import clear
 from opencage.geocoder import OpenCageGeocode
 from tkinter import *
 import webbrowser
@@ -11,18 +15,18 @@ def get_coordinates(city, key):
             lat = round(results[0]["geometry"]["lat"], 2)
             lon = round(results[0]["geometry"]["lng"], 2)
             country = results[0]["components"]["country"]
-            osm_url = f"https://www.openstreetmap.org/?mlat={lat}&mlon={lon}"
-
+            currency = results[0]['annotations']['currency']['name']
+            osm_url = f"https://www.openstreetmap.org/?mlat={lat}&mlon={lon}?mcurrency{currency}"
 
             if "state" in results[0]["components"]:
                 region = results[0]["components"]["state"]
                 return {
-                    "coordinates": f"Широта: {lat}, Долгота: {lon}\n Страна: {country}, \nРегион: {region}",
+                    "coordinates": f"Широта: {lat}, Долгота: {lon}\n Страна: {country}, \nРегион: {region}. \nВаоюта: {currency}",
             "map_url": osm_url
                         }
             else:
                 return {
-                    "coordinates": f"Широта: {lat}, Долгота: {lon}\n Страна: {country}.",
+                    "coordinates": f"Широта: {lat}, Долгота: {lon}\n Страна: {country}, Валюта: {currency}.",
                     "map_url": osm_url
                 }
         else:
@@ -39,10 +43,14 @@ def show_coordinates(event=None):
     map_url = result["map_url"]
 
 
-
 def show_map():
     if map_url:
         webbrowser.open(map_url)
+
+
+def clear_city():
+   entry.delete(0, END)
+
 
 key = '1d18c2b84a624882bca2ab730b049a0e'
 map_url = ""
@@ -50,7 +58,7 @@ map_url = ""
 
 window = Tk()
 window.title("Координаты городов")
-window.geometry("320x160")
+window.geometry("320x200")
 
 entry = Entry()
 entry.pack()
@@ -65,5 +73,7 @@ label.pack()
 map_button = Button(text="Показать карту", command=show_map)
 map_button.pack()
 
+clear_button = Button(text="Очистить", command=clear_city)
+clear_button.pack(pady=15)
 
 window.mainloop()
